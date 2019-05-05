@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>防抖和节流</title>
+  </head>
+  <body>
+      <input type="text" id="input">
+      <script>
+        let a = 0;    
+        //  input输入事件适合用函数防抖
+        let input = document.getElementById("input");
+        input.addEventListener("input", debounce(test, 1000))
+
+
+        // 节流
+        function throttle(fn, wait) {
+            let last, timer;
+            let interval = wait || 200;
+            return function() {
+                let th = this,
+                    args = arguments;
+                let now = +new Date();
+                if (now - last < interval) {
+                    clearTimeout(timer);
+                    timer = setTimeout(function() {
+                        // 只有最后一次触发事件才执行;
+                        last = now;
+                        timer = null;
+                        fn.apply(th, args);
+                    }, interval);
+                } else {
+                    // 每隔interval时间就会执行
+                    last = now;
+                    fn.apply(th, args);
+                }
+            }
+        }
+
+        // 防抖 红宝书实现方法
+        // function debounce(method, context) {
+        //     clearTimeout(method.tId);
+        //     method.tId = setTimeout(function() {
+        //         method.call(context);
+        //     }, 1000)
+        // }
+        // 红宝书实现方法调用方式(使用匿名函数，直接调用只会在最开始调用一次，因为函数执行一次后return了undefined)
+        // 涉及到事件中直接调用函数和调用匿名函数的区别
+        // input.addEventListener("input", function() {
+        //     console.log(this);
+        //     debounce(test)
+        // })
+        // 防抖
+        function debounce(fn, delay) {
+            let delays = delay||500;
+            let timer;
+            return function() {
+                let th = this;
+                let args = arguments;
+                if (timer) {
+                    clearTimeout(timer);
+                }
+                // 最后一次触发事件延时执行一次
+                timer = setTimeout(function() {
+                    timer = null;
+                    fn.apply(th, args);
+                }, delays);
+            };
+        }
+        // 窗口改变事件适合用函数节流
+        window.addEventListener("resize", throttle(test, 1000));
+        
+        function test() {
+            console.log(a++, input.value, +new Date());
+        }
+      </script>
+  </body>
+</html>
